@@ -599,11 +599,6 @@ void SpatioTemporalVoxelLayer::reset(void)
 
   current_ = false;
   was_reset_ = true;
-
-  observation_buffers_iter it = _observation_buffers.begin();
-  for (; it != _observation_buffers.end(); ++it) {
-    (*it)->ResetLastUpdatedTime();
-  }
 }
 
 /*****************************************************************************/
@@ -675,10 +670,9 @@ void SpatioTemporalVoxelLayer::updateCosts(
     return;
   }
 
-  // if not current due to reset, set current now after clearing
+  // set was_reset to false again
   if (!current_ && was_reset_) {
     was_reset_ = false;
-    current_ = true;
   }
 
   if (_update_footprint_enabled) {
@@ -771,6 +765,11 @@ void SpatioTemporalVoxelLayer::updateBounds(
   if (_map_save_duration) {
     should_save = node->now() - _last_map_save_time > *_map_save_duration;
   }
+
+  // mark observations
+  _voxel_grid->Mark(marking_observations);
+
+  // save map or clear frustrums and populate costmap
   if (!_mapping_mode) {
     _voxel_grid->ClearFrustums(clearing_observations, cleared_cells);
   } else if (should_save) {
@@ -789,9 +788,6 @@ void SpatioTemporalVoxelLayer::updateBounds(
     request->file_name = time_buffer;
     SaveGridCallback(nullptr, request, response);
   }
-
-  // mark observations
-  _voxel_grid->Mark(marking_observations);
 
   // update the ROS Layered Costmap
   UpdateROSCostmap(min_x, min_y, max_x, max_y, cleared_cells);
