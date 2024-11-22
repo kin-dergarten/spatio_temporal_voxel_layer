@@ -599,6 +599,9 @@ void SpatioTemporalVoxelLayer::reset(void)
 
   current_ = false;
   was_reset_ = true;
+
+  // @kin-changes (costmap-clearance-issue): Reseting the _last_updated (ResetLastUpdatedTime) of the individual observation buffers was removed,
+  //  since the buffers are not reset in this process either.
 }
 
 /*****************************************************************************/
@@ -673,6 +676,7 @@ void SpatioTemporalVoxelLayer::updateCosts(
   // set was_reset to false again
   if (!current_ && was_reset_) {
     was_reset_ = false;
+    // @kin-changes (costmap-clearance-issue): don't force current_ to be true here
   }
 
   if (_update_footprint_enabled) {
@@ -767,6 +771,8 @@ void SpatioTemporalVoxelLayer::updateBounds(
   }
 
   // mark observations
+  // @kin-changes (costmap-clearance-issue): this was moved before the call to ClearFrustums, to include the
+  //  new markings within one update cycle
   _voxel_grid->Mark(marking_observations);
 
   // save map or clear frustrums and populate costmap
