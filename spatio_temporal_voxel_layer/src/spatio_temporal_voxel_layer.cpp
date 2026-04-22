@@ -119,6 +119,10 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
   // decay param
   declareParameter("voxel_decay", rclcpp::ParameterValue(-1.0));
   node->get_parameter(name_ + ".voxel_decay", _voxel_decay);
+  declareParameter("safety_distance", rclcpp::ParameterValue(2.0));
+  node->get_parameter(name_ + ".safety_distance", _safety_distance);
+  declareParameter("safety_decay", rclcpp::ParameterValue(800.0));
+  node->get_parameter(name_ + ".safety_decay", _safety_decay);
   // whether to map or navigate
   declareParameter("mapping_mode", rclcpp::ParameterValue(false));
   node->get_parameter(name_ + ".mapping_mode", _mapping_mode);
@@ -156,7 +160,7 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
 
   _voxel_grid = std::make_unique<volume_grid::SpatioTemporalVoxelGrid>(
     node->get_clock(), _voxel_size, static_cast<double>(default_value_), _decay_model,
-    _voxel_decay, _publish_voxels);
+    _voxel_decay, _safety_distance, _safety_decay, _publish_voxels);
 
   matchSize();
 
@@ -777,7 +781,10 @@ void SpatioTemporalVoxelLayer::updateBounds(
 
   // save map or clear frustrums and populate costmap
   if (!_mapping_mode) {
-    _voxel_grid->ClearFrustums(clearing_observations, cleared_cells);
+    geometry_msgs::msg::Point32 shuttle_pose;
+	shuttle_pose.x = robot_x;
+	shuttle_pose.y = robot_y;
+    _voxel_grid->ClearFrustums(shuttle_pose, clearing_observations, cleared_cells);
   } else if (should_save) {
     _last_map_save_time = node->now();
     time_t rawtime;
