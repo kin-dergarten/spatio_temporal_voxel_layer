@@ -208,8 +208,8 @@ void SpatioTemporalVoxelGrid::TemporalClearAndGenerateCostmap(
     // if not inside any, check against nominal decay model
     if (!frustum_cycle) {
 	  // Check if far enough away.
-	  // TODO: Make it more or less a square instead of a circle
-	  if (std::hypot(shuttle_pose.x - pose_world[0], shuttle_pose.y - pose_world[1]) > _safety_distance) {
+	  // Check is done like in costmap clearing. Check for a square around the shuttle in costmap frame.
+	  if (std::abs(shuttle_pose.x - pose_world[0]) > _safety_distance ||  std::abs(shuttle_pose.y - pose_world[1]) > _safety_distance) {
  	     if (base_duration_to_decay < 0.) {
     	    // expired by temporal clearing
         	cleared_point = true;

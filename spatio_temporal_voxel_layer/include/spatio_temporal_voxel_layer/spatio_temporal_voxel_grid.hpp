@@ -153,6 +153,16 @@ public:
   // Save the file to file with size information
   bool SaveGrid(const std::string & file_name, double & map_size_bytes);
 
+  void SetSafetyDistance(const double safety_distance)
+  {
+    _safety_distance = safety_distance;
+  }
+
+  void SetSafetyDecay(const double safety_decay)
+  {
+    _safety_decay = safety_decay;
+  }
+
 protected:
   // Initialize grid metadata and library
   void InitializeGrid(void);

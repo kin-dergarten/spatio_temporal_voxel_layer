@@ -80,7 +80,7 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
     getName().c_str(), _global_frame.c_str());
 
   bool track_unknown_space;
-  double transform_tolerance, map_save_time;
+  double transform_tolerance, map_save_time, safety_distance, safety_decay;
   int decay_model_int;
   // source names
   auto node = node_.lock();
@@ -120,9 +120,9 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
   declareParameter("voxel_decay", rclcpp::ParameterValue(-1.0));
   node->get_parameter(name_ + ".voxel_decay", _voxel_decay);
   declareParameter("safety_distance", rclcpp::ParameterValue(2.0));
-  node->get_parameter(name_ + ".safety_distance", _safety_distance);
+  node->get_parameter(name_ + ".safety_distance", safety_distance);
   declareParameter("safety_decay", rclcpp::ParameterValue(800.0));
-  node->get_parameter(name_ + ".safety_decay", _safety_decay);
+  node->get_parameter(name_ + ".safety_decay", safety_decay);
   // whether to map or navigate
   declareParameter("mapping_mode", rclcpp::ParameterValue(false));
   node->get_parameter(name_ + ".mapping_mode", _mapping_mode);
@@ -160,7 +160,7 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
 
   _voxel_grid = std::make_unique<volume_grid::SpatioTemporalVoxelGrid>(
     node->get_clock(), _voxel_size, static_cast<double>(default_value_), _decay_model,
-    _voxel_decay, _safety_distance, _safety_decay, _publish_voxels);
+    _voxel_decay, safety_distance, safety_decay, _publish_voxels);
 
   matchSize();
 
@@ -911,6 +911,20 @@ SpatioTemporalVoxelLayer::dynamicParametersCallback(std::vector<rclcpp::Paramete
               buffer->Unlock();
             }
           }
+        }
+      }
+    }
+
+	if (type == ParameterType::PARAMETER_DOUBLE) {
+	  if (name == name_ + "." + "safety_distance") {
+        if (_voxel_grid) {
+          boost::recursive_mutex::scoped_lock lock(_voxel_grid_lock);
+          _voxel_grid->SetSafetyDistance(parameter.as_double());
+	    }
+      } else if (name == name_ + "." + "safety_decay") {
+        if (_voxel_grid) {
+          boost::recursive_mutex::scoped_lock lock(_voxel_grid_lock);
+          _voxel_grid->SetSafetyDecay(parameter.as_double());
         }
       }
     }
