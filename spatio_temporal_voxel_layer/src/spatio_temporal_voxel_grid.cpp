@@ -332,18 +332,27 @@ SpatioTemporalVoxelGrid::GetFlattenedCostmap()
   return _cost_map;
 }
 
+
+/*****************************************************************************/
+double GetTemporalDuration(const double & time_delta, const double & decay, const int decay_model)
+/*****************************************************************************/
+{
+  // use configurable model to get desired decay time
+  if (decay_model == 0) {  // Linear
+    return decay - time_delta;
+  } else if (decay_model == 1) {  // Exponential
+    return decay * std::exp(-time_delta);
+  }
+
+  return decay;  // PERSISTENT
+}
+
 /*****************************************************************************/
 double SpatioTemporalVoxelGrid::GetTemporalClearingDuration(
   const double & time_delta)
 /*****************************************************************************/
 {
-  // use configurable model to get desired decay time
-  if (_decay_model == 0) {  // Linear
-    return _voxel_decay - time_delta;
-  } else if (_decay_model == 1) {  // Exponential
-    return _voxel_decay * std::exp(-time_delta);
-  }
-  return _voxel_decay;  // PERSISTENT
+  return GetTemporalDuration(time_delta, _decay_model, _decay_model);
 }
 
 /*****************************************************************************/
@@ -354,13 +363,8 @@ double SpatioTemporalVoxelGrid::GetTemporalSafetyDuration(
   if (_safety_decay <= 0.) {
     return 1.0; // Never decay
   }
-  // use configurable model to get desired decay time
-  if (_decay_model == 0) {  // Linear
-    return _safety_decay - time_delta;
-  } else if (_decay_model == 1) {  // Exponential
-    return _safety_decay * std::exp(-time_delta);
-  }
-  return _safety_decay;  // PERSISTENT
+
+  return GetTemporalDuration(time_delta, _safety_decay, _decay_model);
 }
 
 /*****************************************************************************/
