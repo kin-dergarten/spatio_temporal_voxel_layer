@@ -171,7 +171,7 @@ void SpatioTemporalVoxelGrid::TemporalClearAndGenerateCostmap(
     const double time_since_marking = cur_time - cit_grid.getValue();
     const double base_duration_to_decay = GetTemporalClearingDuration(
       time_since_marking);
-	const double safety_duration_to_decay = GetTemporalSafetyDuration(
+	  const double safety_duration_to_decay = GetTemporalSafetyDuration(
       time_since_marking);
 
     for (; frustum_it != frustums.end(); ++frustum_it) {
@@ -209,21 +209,22 @@ void SpatioTemporalVoxelGrid::TemporalClearAndGenerateCostmap(
     if (!frustum_cycle) {
 	  // Check if far enough away.
 	  // Check is done like in costmap clearing. Check for a square around the shuttle in costmap frame.
-	  if (std::abs(shuttle_pose.x - pose_world[0]) > _safety_distance ||  std::abs(shuttle_pose.y - pose_world[1]) > _safety_distance) {
- 	     if (base_duration_to_decay < 0.) {
-    	    // expired by temporal clearing
-        	cleared_point = true;
-        	if (!this->ClearGridPoint(pt_index)) {
-          		std::cout << "Failed to clear point." << std::endl;
-        	}
+	  if (std::abs(shuttle_pose.x - pose_world[0]) > _safety_distance ||
+	      std::abs(shuttle_pose.y - pose_world[1]) > _safety_distance) {
+	    if (base_duration_to_decay < 0.) {
+	      // expired by temporal clearing
+	      cleared_point = true;
+	      if (!this->ClearGridPoint(pt_index)) {
+	        std::cout << "Failed to clear point." << std::endl;
+	      }
+	    }
+	  } else if (safety_duration_to_decay < 0.) {
+	      // expired by temporal clearing
+        cleared_point = true;
+      	if (!this->ClearGridPoint(pt_index)) {
+        		std::cout << "Failed to clear point." << std::endl;
       	}
-		else if (safety_duration_to_decay < 0.) {
-          cleared_point = true;
-        	if (!this->ClearGridPoint(pt_index)) {
-          		std::cout << "Failed to clear point." << std::endl;
-        	}
-        }
-	  }
+      }
     }
 
     if (cleared_point)
