@@ -352,7 +352,7 @@ double SpatioTemporalVoxelGrid::GetTemporalClearingDuration(
   const double & time_delta)
 /*****************************************************************************/
 {
-  return GetTemporalDuration(time_delta, _decay_model, _decay_model);
+  return GetTemporalDuration(time_delta, _voxel_decay, _decay_model);
 }
 
 /*****************************************************************************/
