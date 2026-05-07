@@ -983,18 +983,26 @@ void SpatioTemporalVoxelLayer::clearArea(
   mapToWorld(end_x, end_y, end_world.x, end_world.y);
 
   if (invert_area) {
-    double safety_distance = _voxel_grid->GetSafetyDistance();
-    double center_x = (start_world.x + end_world.x) / 2;
-    double center_y = (start_world.y + end_world.y) / 2;
+    const double safety_distance = _voxel_grid->GetSafetyDistance();
+    const double center_x = (start_world.x + end_world.x) / 2.0;
+    const double center_y = (start_world.y + end_world.y) / 2.0;
 
-    double half_x = std::max(center_x - start_world.x, safety_distance);
-    double half_y = std::max(center_y - start_world.y, safety_distance);
+    const double half_x = center_x - start_world.x;
+    const double half_y = center_y - start_world.y;
 
-    start_world.x = center_x - half_x;
-    start_world.y = center_y - half_y;
+    const double updated_half_x = std::max(half_x, safety_distance);
+    const double updated_half_y = std::max(half_y, safety_distance);
 
-    end_world.x = center_x + half_x;
-    end_world.y = center_y + half_y;
+    RCLCPP_INFO(logger_, "%s->clearArea(): inverted safety_distance=%.3f half_x:%.3f->%.3f half_y:%.3f->%.3f",
+      getName().c_str(), safety_distance, half_x, updated_half_x, half_y, updated_half_y);
+
+    start_world.x = center_x - updated_half_x;
+    start_world.y = center_y - updated_half_y;
+
+    end_world.x = center_x + updated_half_x;
+    end_world.y = center_y + updated_half_y;
+  } else {
+    RCLCPP_INFO(logger_, "%s->clearArea(): not inverted", getName().c_str());
   }
 
   boost::recursive_mutex::scoped_lock lock(_voxel_grid_lock);
