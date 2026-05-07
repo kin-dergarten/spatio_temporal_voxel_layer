@@ -782,8 +782,8 @@ void SpatioTemporalVoxelLayer::updateBounds(
   // save map or clear frustrums and populate costmap
   if (!_mapping_mode) {
     geometry_msgs::msg::Point32 shuttle_pose;
-	shuttle_pose.x = robot_x;
-	shuttle_pose.y = robot_y;
+    shuttle_pose.x = robot_x;
+    shuttle_pose.y = robot_y;
     _voxel_grid->ClearFrustums(shuttle_pose, clearing_observations, cleared_cells);
   } else if (should_save) {
     _last_map_save_time = node->now();
@@ -981,6 +981,21 @@ void SpatioTemporalVoxelLayer::clearArea(
   volume_grid::occupany_cell end_world(0, 0);
   mapToWorld(start_x, start_y, start_world.x, start_world.y);
   mapToWorld(end_x, end_y, end_world.x, end_world.y);
+
+  if (invert_area) {
+    double safety_distance = _voxel_grid->GetSafetyDistance();
+    double center_x = (start_world.x + end_world.x) / 2;
+    double center_y = (start_world.y + end_world.y) / 2;
+
+    double half_x = std::max(center_x - start_world.x, safety_distance);
+    double half_y = std::max(center_y - start_world.y, safety_distance);
+
+    start_world.x = center_x - half_x;
+    start_world.y = center_y - half_y;
+
+    end_world.x = center_x + half_x;
+    end_world.y = center_y + half_y;
+  }
 
   boost::recursive_mutex::scoped_lock lock(_voxel_grid_lock);
   _voxel_grid->ResetGridArea(start_world, end_world, invert_area);

@@ -158,6 +158,11 @@ public:
     _safety_distance = safety_distance;
   }
 
+  double GetSafetyDistance()
+  {
+    return _safety_distance;
+  }
+
   void SetSafetyDecay(const double safety_decay)
   {
     _safety_decay = safety_decay;
