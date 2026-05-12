@@ -1001,8 +1001,6 @@ void SpatioTemporalVoxelLayer::clearArea(
 
     end_world.x = center_x + updated_half_x;
     end_world.y = center_y + updated_half_y;
-  } else {
-    RCLCPP_INFO(logger_, "%s->clearArea(): not inverted", getName().c_str());
   }
 
   boost::recursive_mutex::scoped_lock lock(_voxel_grid_lock);
