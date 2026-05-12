@@ -151,12 +151,12 @@ void SpatioTemporalVoxelLayer::onInitialize(void)
   pub_opt.callback_group = callback_group_;
 
   _voxel_pub = node->create_publisher<sensor_msgs::msg::PointCloud2>(
-    "voxel_grid", rclcpp::QoS(1), pub_opt);
+    name_ + "/voxel_grid", rclcpp::QoS(1), pub_opt);
 
   auto save_grid_callback = std::bind(
     &SpatioTemporalVoxelLayer::SaveGridCallback, this, _1, _2, _3);
   _grid_saver = node->create_service<spatio_temporal_voxel_layer::srv::SaveGrid>(
-    "save_grid", save_grid_callback, rmw_qos_profile_services_default, callback_group_);
+    name_ + "/save_grid", save_grid_callback, rmw_qos_profile_services_default, callback_group_);
 
   _voxel_grid = std::make_unique<volume_grid::SpatioTemporalVoxelGrid>(
     node->get_clock(), _voxel_size, static_cast<double>(default_value_), _decay_model,
