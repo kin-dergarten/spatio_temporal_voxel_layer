@@ -361,7 +361,7 @@ double SpatioTemporalVoxelGrid::GetTemporalSafetyDuration(
   const double & time_delta)
 /*****************************************************************************/
 {
-  if (_safety_decay <= 0.) {
+  if (_safety_decay < 0.) {
     return 1.0; // Never decay
   }
 
